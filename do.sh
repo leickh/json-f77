@@ -10,7 +10,7 @@ case $1 in
         "$PROJECT_PATH/src-sh/build.sh" "${@:1}"
         ;;
 
-    "rt" | "run-tests")
-        # TODO)) Tests haven't been implemented yet.
+    "bt" | "build-tests")
+        "$PROJECT_PATH/src-sh/build-tests.sh" "${@:1}"
         ;;
 esac
