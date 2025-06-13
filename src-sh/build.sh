@@ -8,7 +8,7 @@ search_sources() {
 
     ((LEN_WITHOUT_PATH_PREFIX=${#SEARCH_PATH}+2))
 
-    local RAW_FILE_NAMES=$(find "$SEARCH_PATH" -type f | cut -c "$LEN_WITHOUT_PATH_PREFIX-")
+    local RAW_FILE_NAMES=$(find "$SEARCH_PATH" -type f | grep ".for$" | cut -c "$LEN_WITHOUT_PATH_PREFIX-")
     for RAW_FILE_NAME in $RAW_FILE_NAMES;
     do
         ((NAME_LENGTH_WITHOUT_SUFFIX=${#RAW_FILE_NAME}-4))
