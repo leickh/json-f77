@@ -26,8 +26,11 @@ build_library() {
 
     for FILE_ENTRY in $FILE_LIST;
     do
-        gfortran -g2 -c -o ".build/objects/$FILE_ENTRY.o" src-f77/$FILE_ENTRY.for
+        lfortran --std legacy -c -o ".build/objects/$FILE_ENTRY.o" src-f77/$FILE_ENTRY.for
     done
+
+    ar -rvs "$PROJECT_PATH/.build/json-f77.a" \
+        "$PROJECT_PATH/.build/objects/"*.o
 }
 
 build_library "$@"
