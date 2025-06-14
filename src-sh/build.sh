@@ -19,18 +19,22 @@ search_sources() {
 build_library() {
     local FILE_LIST=$(search_sources "$PROJECT_PATH/src-f77")
 
+    mkdir -p "$PROJECT_PATH/.build/module-files"
+    # rm -r "$PROJECT_PATH/.build/module-files/"
+    
     mkdir -p "$PROJECT_PATH/.build/objects"
     rm -f "$PROJECT_PATH/.build/objects/"*.o
 
+    cd "$PROJECT_PATH/.build/module-files/$SOURCE_SUBFOLDER"
     for FILE_ENTRY in $FILE_LIST;
     do
         echo "> $FILE_ENTRY"
 
         local OBJECT_NAME=$(echo $FILE_ENTRY | tr "-" "_" | tr "/" "-")
 
-        gfortran --std legacy -c \
-            -o ".build/objects/$OBJECT_NAME.o" \
-            "src-f77/$FILE_ENTRY.for"
+        gfortran -g2 -c \
+            -o "$PROJECT_PATH/.build/objects/$OBJECT_NAME.o" \
+            "$PROJECT_PATH/src-f77/$FILE_ENTRY.for"
     done
 
     rm -f "$PROJECT_PATH/.build/objects/json-f77.a"

@@ -23,16 +23,18 @@ build_test() {
     mkdir -p "$PROJECT_PATH/.build/tests/$TEST_NAME/objects"
 
     SOURCE_LIST=$(search_sources "$TEST_PATH/src-f77")
+    
+    cd "$PROJECT_PATH/.build/module-files/$SOURCE_SUBFOLDER"
     for SOURCE_NAME in $SOURCE_LIST;
     do
         local OBJECT_NAME=$(echo $FILE_ENTRY | tr "-" "_" | tr "/" "-")
 
-        lfortran --std legacy -c -o \
+        gfortran -g2 -c -o \
             "$PROJECT_PATH/.build/tests/$TEST_NAME/objects/$SOURCE_NAME.o" \
             "$TEST_PATH/src-f77/$SOURCE_NAME.for"
     done
 
-    lfortran --std legacy -o "$PROJECT_PATH/.tests/$TEST_NAME.elf" \
+    gfortran -g2 -o "$PROJECT_PATH/.tests/$TEST_NAME.elf" \
         "$PROJECT_PATH/.build/tests/$TEST_NAME/objects/"*.o \
         "$PROJECT_PATH/.build/json-f77.a" -lgfortran
 }
