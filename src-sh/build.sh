@@ -12,9 +12,7 @@ search_sources() {
     for RAW_FILE_NAME in $RAW_FILE_NAMES;
     do
         ((NAME_LENGTH_WITHOUT_SUFFIX=${#RAW_FILE_NAME}-4))
-        echo "$RAW_FILE_NAME" | cut -c -$NAME_LENGTH_WITHOUT_SUFFIX \
-            | tr "-" "_" \
-            | tr "/" "-"
+        echo "$RAW_FILE_NAME" | cut -c -$NAME_LENGTH_WITHOUT_SUFFIX
     done
 }
 
@@ -26,7 +24,11 @@ build_library() {
 
     for FILE_ENTRY in $FILE_LIST;
     do
-        lfortran --std legacy -c -o ".build/objects/$FILE_ENTRY.o" src-f77/$FILE_ENTRY.for
+        echo "> $FILE_ENTRY"
+
+        local OBJECT_NAME=$(echo $FILE_ENTRY | tr "-" "_" | tr "/" "-")
+
+        lfortran --std legacy -c -o ".build/objects/$OBJECT_NAME.o" src-f77/$FILE_ENTRY.for
     done
 
     ar -rvs "$PROJECT_PATH/.build/json-f77.a" \

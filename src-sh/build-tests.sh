@@ -12,9 +12,7 @@ search_sources() {
     for RAW_FILE_NAME in $RAW_FILE_NAMES;
     do
         ((NAME_LENGTH_WITHOUT_SUFFIX=${#RAW_FILE_NAME}-4))
-        echo "$RAW_FILE_NAME" | cut -c -$NAME_LENGTH_WITHOUT_SUFFIX \
-            | tr "-" "_" \
-            | tr "/" "-"
+        echo "$RAW_FILE_NAME" | cut -c -$NAME_LENGTH_WITHOUT_SUFFIX
     done
 }
 
@@ -27,8 +25,10 @@ build_test() {
     SOURCE_LIST=$(search_sources "$TEST_PATH/src-f77")
     for SOURCE_NAME in $SOURCE_LIST;
     do
+        local OBJECT_NAME=$(echo $FILE_ENTRY | tr "-" "_" | tr "/" "-")
+
         lfortran --std legacy -c -o \
-            "$PROJECT_PATH/.build/tests/$TEST_NAME/objects/$SOURCE_NAME.o" \
+            "$PROJECT_PATH/.build/tests/$TEST_NAME/objects/$OBJECT_NAME.o" \
             "$TEST_PATH/src-f77/$SOURCE_NAME.for"
     done
 
