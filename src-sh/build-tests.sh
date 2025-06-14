@@ -28,14 +28,13 @@ build_test() {
         local OBJECT_NAME=$(echo $FILE_ENTRY | tr "-" "_" | tr "/" "-")
 
         lfortran --std legacy -c -o \
-            "$PROJECT_PATH/.build/tests/$TEST_NAME/objects/$OBJECT_NAME.o" \
+            "$PROJECT_PATH/.build/tests/$TEST_NAME/objects/$SOURCE_NAME.o" \
             "$TEST_PATH/src-f77/$SOURCE_NAME.for"
     done
 
     lfortran --std legacy -o "$PROJECT_PATH/.tests/$TEST_NAME.elf" \
         "$PROJECT_PATH/.build/tests/$TEST_NAME/objects/"*.o \
-        "$PROJECT_PATH/.build/json-f77.a" \
-
+        "$PROJECT_PATH/.build/json-f77.a" -lgfortran
 }
 
 mkdir -p $PROJECT_PATH/.tests

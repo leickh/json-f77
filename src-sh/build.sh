@@ -20,7 +20,7 @@ build_library() {
     local FILE_LIST=$(search_sources "$PROJECT_PATH/src-f77")
 
     mkdir -p "$PROJECT_PATH/.build/objects"
-    rm -f "$PROJECT_PATH/.build/objects/*.o"
+    rm -f "$PROJECT_PATH/.build/objects/"*.o
 
     for FILE_ENTRY in $FILE_LIST;
     do
@@ -28,9 +28,12 @@ build_library() {
 
         local OBJECT_NAME=$(echo $FILE_ENTRY | tr "-" "_" | tr "/" "-")
 
-        lfortran --std legacy -c -o ".build/objects/$OBJECT_NAME.o" src-f77/$FILE_ENTRY.for
+        gfortran --std legacy -c \
+            -o ".build/objects/$OBJECT_NAME.o" \
+            "src-f77/$FILE_ENTRY.for"
     done
 
+    rm -f "$PROJECT_PATH/.build/objects/json-f77.a"
     ar -rvs "$PROJECT_PATH/.build/json-f77.a" \
         "$PROJECT_PATH/.build/objects/"*.o
 }
