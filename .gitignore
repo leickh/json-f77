@@ -6,3 +6,14 @@
 .build/
 .tests/
 
+vgcore.*
+
+*.a
+*.elf
+*.o
+*.so
+
+*.dll
+*.exe
+*.lib
+
