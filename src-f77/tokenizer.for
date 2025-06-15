@@ -39,7 +39,6 @@ C           1. within_string
 C           2. within_number
 C           3. within_decimal
 C           4. within_word
-C           5. sign_found
 C
 C     @todo: Split this function into multiple parts for each FSM state
         SUBROUTINE tokenize_json(source, len_source, tokens, num_tokens)
@@ -52,6 +51,9 @@ C       Declarations
           CHARACTER,POINTER :: source(:)
           INTEGER(4) :: source_offset
           INTEGER(4) :: token_start
+          
+          INTEGER(4) :: characters_to_skip
+          INTEGER(4) :: len_token
 
 C       Number of the next token; index of the token one after the last
 C       currently used one. This is  the index of the token, not of the
@@ -73,6 +75,9 @@ C       loop, when the branch for the sign is taken.
 
 C       Initialization
 
+          characters_to_skip = 0
+          len_token = 0
+
           token_index = 0
           source_offset = 1
           fsm_state = 0
@@ -85,6 +90,12 @@ C              allocate the tokens for creation in the next pass.
 C       Tokenization Loop
 
           DO 390 source_offset = 1, len_source
+            IF(characters_to_skip .GT. 0) THEN
+              characters_to_skip = characters_to_skip - 1
+              GOTO 390
+            END IF
+
+C         @todo: Accept UTF-8
             current_character = source(source_offset)
             SELECT CASE(fsm_state)
 
@@ -107,35 +118,174 @@ C       Tokenization Loop
                   GOTO 390
                 END IF
                 
-                IF(is_sign(current_character)) THEN
+                IF(is_digit(current_character)) THEN
                   token_start = source_offset
-                  delimiter = current_character
-                  fsm_state = 5
+                  DO 1100 characters_to_skip = 1, len_source
+C                 @todo: Accept UTF-8
+                    current_character =                                 &
+     &               source(source_offset + characters_to_skip)
+                    IF(is_digit(current_character) .NEQV. .TRUE.) THEN
+                      EXIT
+                    END IF
+1100              END DO
+
+                  len_token = (source_offset + characters_to_skip)      &
+     &              - token_start
+
+C               If there is no dot directly after the number, it means
+C               that it is an integer, not a decimal number.
+                  IF(current_character .NE. '.') THEN
+                    tokens(token_index*5+1) = 1
+                    tokens(token_index*5+2) = source_offset
+                    tokens(token_index*5+3) = len_token
+C                 @todo: Fill the fields 'line_index' and 'column_index'
+                    tokens(token_index*5+4) = 1
+                    tokens(token_index*5+5) = 1
+
+                    token_index = token_index + 1
+                    characters_to_skip = characters_to_skip - 1
+                    GOTO 390
+                  END IF
+
+                  characters_to_skip = characters_to_skip + 1
+
+C               Here, a decimal number is being tokenized.
+                  DO 1580 characters_to_skip = characters_to_skip,      &
+     &              len_source
+C                 @todo: Accept UTF-8
+                    current_character =                                 &
+     &                source(source_offset + characters_to_skip)
+                    IF(is_digit(current_character) .NEQV. .TRUE.) THEN
+                      EXIT
+                    END IF
+1580              END DO
+
+                  len_token = (source_offset + characters_to_skip)      &
+     &              - token_start
+
+                  tokens(token_index*5+1) = 2
+                  tokens(token_index*5+2) = source_offset
+                  tokens(token_index*5+3) = len_token
+C               @todo: Fill the fields 'line_index' and 'column_index'
+                  tokens(token_index*5+4) = 1
+                  tokens(token_index*5+5) = 1
+
+                  token_index = token_index + 1
+                  characters_to_skip = characters_to_skip - 1
+
+                  GOTO 390
+                END IF
+
+                IF(is_letter(current_character)) THEN
+                  token_start = source_offset
+                  DO 1880 characters_to_skip = 1, len_source
+C                 @todo: Accept UTF-8
+                    current_character =                                 &
+     &               source(source_offset + characters_to_skip)
+                    IF(is_letter(current_character) .NEQV. .TRUE.) THEN
+                      EXIT
+                    END IF
+1880              END DO
+
+                  len_token = (source_offset + characters_to_skip)      &
+     &              - token_start
+
+                  tokens(token_index*5+1) = 3
+                  tokens(token_index*5+2) = source_offset
+                  tokens(token_index*5+3) = len_token
+C               @todo: Fill the fields 'line_index' and 'column_index'
+                  tokens(token_index*5+4) = 1
+                  tokens(token_index*5+5) = 1
+
+                  token_index = token_index + 1
+                  characters_to_skip = characters_to_skip - 1
+
+                  GOTO 390
+                END IF
+
+                IF(is_sign(current_character)) THEN
+                  IF(current_character .EQ. '{') THEN
+                    tokens(token_index*5+1) = 4
+                    tokens(token_index*5+2) = source_offset
+                    tokens(token_index*5+3) = 1
+C                 @todo: Fill the fields 'line_index' and 'column_index'
+                    tokens(token_index*5+4) = 1
+                    tokens(token_index*5+5) = 1
+
+                    token_index = token_index + 1
+                    GOTO 390
+                  END IF
+
+                  IF(current_character .EQ. '}') THEN
+                    tokens(token_index*5+1) = 5
+                    tokens(token_index*5+2) = source_offset
+                    tokens(token_index*5+3) = 1
+C                 @todo: Fill the fields 'line_index' and 'column_index'
+                    tokens(token_index*5+4) = 1
+                    tokens(token_index*5+5) = 1
+
+                    token_index = token_index + 1
+                    GOTO 390
+                  END IF
+
+                  IF(current_character .EQ. '[') THEN
+                    tokens(token_index*5+1) = 6
+                    tokens(token_index*5+2) = source_offset
+                    tokens(token_index*5+3) = 1
+C                 @todo: Fill the fields 'line_index' and 'column_index'
+                    tokens(token_index*5+4) = 1
+                    tokens(token_index*5+5) = 1
+
+                    token_index = token_index + 1
+                    GOTO 390
+                  END IF
+
+                  IF(current_character .EQ. ']') THEN
+                    tokens(token_index*5+1) = 7
+                    tokens(token_index*5+2) = source_offset
+                    tokens(token_index*5+3) = 1
+C                 @todo: Fill the fields 'line_index' and 'column_index'
+                    tokens(token_index*5+4) = 1
+                    tokens(token_index*5+5) = 1
+
+                    token_index = token_index + 1
+                    GOTO 390
+                  END IF
+
+                  IF(current_character .EQ. ':') THEN
+                    tokens(token_index*5+1) = 8
+                    tokens(token_index*5+2) = source_offset
+                    tokens(token_index*5+3) = 1
+C                 @todo: Fill the fields 'line_index' and 'column_index'
+                    tokens(token_index*5+4) = 1
+                    tokens(token_index*5+5) = 1
+
+                    token_index = token_index + 1
+                    GOTO 390
+                  END IF
+
+                  IF(current_character .EQ. ',') THEN
+                    tokens(token_index*5+1) = 9
+                    tokens(token_index*5+2) = source_offset
+                    tokens(token_index*5+3) = 1
+C                 @todo: Fill the fields 'line_index' and 'column_index'
+                    tokens(token_index*5+4) = 1
+                    tokens(token_index*5+5) = 1
+
+                    token_index = token_index + 1
+                    GOTO 390
+                  END IF
                   GOTO 390
                 END IF
 
               CASE(1)
-                
-                
+                IF(current_character .EQ. delimiter) THEN
 
-              CASE(2)
-                
-                
-
-              CASE(3)
-                
-                
-
-              CASE(4)
-                
-                
-
-              CASE(5)
-                IF(delimiter .EQ. '{') THEN
-                  tokens(token_index*5+1) = 4
-                  tokens(token_index*5+2) = token_start
-                  tokens(token_index*5+3) = source_offset - token_start
-C               @todo: Fill the fields 'line_index' and 'column_index'
+                  tokens(token_index*5+1) = 0
+                  tokens(token_index*5+2) = token_start + 1
+                  tokens(token_index*5+3) =                             &
+     &              source_offset - token_start - 1
+C                 @todo: Fill the fields 'line_index' and 'column_index'
                   tokens(token_index*5+4) = 1
                   tokens(token_index*5+5) = 1
 
@@ -144,78 +294,6 @@ C               @todo: Fill the fields 'line_index' and 'column_index'
                   fsm_state = 0
                   GOTO 390
                 END IF
-
-                IF(delimiter .EQ. '}') THEN
-                  tokens(token_index*5+1) = 5
-                  tokens(token_index*5+2) = token_start
-                  tokens(token_index*5+3) = source_offset - token_start
-C               @todo: Fill the fields 'line_index' and 'column_index'
-                  tokens(token_index*5+4) = 1
-                  tokens(token_index*5+5) = 1
-
-                  token_index = token_index + 1
-
-                  fsm_state = 0
-                  GOTO 390
-                END IF
-
-                IF(delimiter .EQ. '[') THEN
-                  tokens(token_index*5+1) = 6
-                  tokens(token_index*5+2) = token_start
-                  tokens(token_index*5+3) = source_offset - token_start
-C               @todo: Fill the fields 'line_index' and 'column_index'
-                  tokens(token_index*5+4) = 1
-                  tokens(token_index*5+5) = 1
-
-                  token_index = token_index + 1
-
-                  fsm_state = 0
-                  GOTO 390
-                END IF
-
-                IF(delimiter .EQ. ']') THEN
-                  tokens(token_index*5+1) = 7
-                  tokens(token_index*5+2) = token_start
-                  tokens(token_index*5+3) = source_offset - token_start
-C               @todo: Fill the fields 'line_index' and 'column_index'
-                  tokens(token_index*5+4) = 1
-                  tokens(token_index*5+5) = 1
-
-                  token_index = token_index + 1
-
-                  fsm_state = 0
-                  GOTO 390
-                END IF
-
-                IF(delimiter .EQ. ':') THEN
-                  tokens(token_index*5+1) = 8
-                  tokens(token_index*5+2) = token_start
-                  tokens(token_index*5+3) = source_offset - token_start
-C               @todo: Fill the fields 'line_index' and 'column_index'
-                  tokens(token_index*5+4) = 1
-                  tokens(token_index*5+5) = 1
-
-                  token_index = token_index + 1
-
-                  fsm_state = 0
-                  GOTO 390
-                END IF
-
-                IF(delimiter .EQ. ',') THEN
-                  tokens(token_index*5+1) = 9
-                  tokens(token_index*5+2) = token_start
-                  tokens(token_index*5+3) = source_offset - token_start
-C               @todo: Fill the fields 'line_index' and 'column_index'
-                  tokens(token_index*5+4) = 1
-                  tokens(token_index*5+5) = 1
-
-                  token_index = token_index + 1
-
-                  fsm_state = 0
-                  GOTO 390
-                END IF
-
-
             END SELECT
 390       END DO
 
