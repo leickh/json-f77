@@ -32,7 +32,7 @@ build_library() {
 
         local OBJECT_NAME=$(echo $FILE_ENTRY | tr "-" "_" | tr "/" "-")
 
-        gfortran -g2 -c \
+        gfortran -O2 -g2 -c \
             -o "$PROJECT_PATH/.build/objects/$OBJECT_NAME.o" \
             "$PROJECT_PATH/src-f77/$FILE_ENTRY.for"
     done

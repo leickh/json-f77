@@ -29,12 +29,12 @@ build_test() {
     do
         local OBJECT_NAME=$(echo $FILE_ENTRY | tr "-" "_" | tr "/" "-")
 
-        gfortran -g2 -c -o \
+        gfortran -O2 -g2 -c -o \
             "$PROJECT_PATH/.build/tests/$TEST_NAME/objects/$SOURCE_NAME.o" \
             "$TEST_PATH/src-f77/$SOURCE_NAME.for"
     done
 
-    gfortran -g2 -o "$PROJECT_PATH/.tests/$TEST_NAME.elf" \
+    gfortran -O2 -g2 -o "$PROJECT_PATH/.tests/$TEST_NAME.elf" \
         "$PROJECT_PATH/.build/tests/$TEST_NAME/objects/"*.o \
         "$PROJECT_PATH/.build/json-f77.a" -lgfortran
 }

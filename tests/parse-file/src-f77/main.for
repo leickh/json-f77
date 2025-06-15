@@ -3,7 +3,7 @@
         USE json_parser
         IMPLICIT NONE
 
-        INTEGER(1),ALLOCATABLE :: tokens(:)
+        INTEGER(1),POINTER :: tokens(:)
         CHARACTER,POINTER :: source(:)
 
         INTEGER :: file_status
@@ -25,9 +25,9 @@
 
         PRINT *, source
 
-        tokens = parse_json(source)
-        DEALLOCATE(tokens)
+        tokens => parse_json(source)
 
+        DEALLOCATE(tokens)
         DEALLOCATE(source)
       END
 
