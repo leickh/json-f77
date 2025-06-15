@@ -2,9 +2,12 @@
 *
 !*/
 !*.*
+!LICENSE
+!.gitignore
 
 .build/
 .tests/
+.private/
 
 vgcore.*
 
@@ -16,4 +19,6 @@ vgcore.*
 *.dll
 *.exe
 *.lib
+
+input.json
 
