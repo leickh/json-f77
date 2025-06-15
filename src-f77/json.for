@@ -2,7 +2,8 @@
       MODULE json_parser
         USE json_tokenizer
       CONTAINS
-        FUNCTION parse_json() RESULT(tokens)
+        FUNCTION parse_json(source) RESULT(tokens)
+          CHARACTER,POINTER :: source(:)
           BYTE,ALLOCATABLE :: tokens(:)
           tokens = tokenize_json()
           
