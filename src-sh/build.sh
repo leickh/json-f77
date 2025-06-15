@@ -32,7 +32,7 @@ build_library() {
 
         local OBJECT_NAME=$(echo $FILE_ENTRY | tr "-" "_" | tr "/" "-")
 
-        gfortran -O2 -g2 -c \
+        gfortran --std=legacy -O2 -g2 -c \
             -o "$PROJECT_PATH/.build/objects/$OBJECT_NAME.o" \
             "$PROJECT_PATH/src-f77/$FILE_ENTRY.for"
     done
@@ -42,4 +42,19 @@ build_library() {
         "$PROJECT_PATH/.build/objects/"*.o
 }
 
-build_library "$@"
+build_library_n_times() {
+    local NUM_SOURCES=$(search_sources "$PROJECT_PATH/src-f77" | wc -l)
+    ((NUM_SOURCES--))
+
+    local BUILD_INDEX=0
+    while [[ $BUILD_INDEX -lt $NUM_SOURCES ]];
+    do
+        build_library >>/dev/null 2>>/dev/null
+        ((BUILD_INDEX++))
+    done
+
+    build_library
+}
+
+build_library_n_times "$@"
+
