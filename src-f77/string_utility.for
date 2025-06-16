@@ -223,5 +223,24 @@ C       In the case of a space (32 in decimal = 0x20 = ' ')
           boolean = .FALSE.
           RETURN
         END FUNCTION is_sign
+
+
+
+        FUNCTION is_printable(code_point) RESULT(boolean)
+          CHARACTER(4) :: code_point
+          LOGICAL :: boolean
+
+          IF(code_point .LT. CHAR(33)) THEN
+            boolean = .FALSE.
+            RETURN
+          END IF
+
+          IF(code_point .GT. CHAR(126)) THEN
+            boolean = .FALSE.
+            RETURN
+          END IF
+
+          boolean = .TRUE.
+        END FUNCTION is_printable
       END MODULE json_string_utility
 
