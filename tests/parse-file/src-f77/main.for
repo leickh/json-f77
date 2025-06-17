@@ -1,33 +1,28 @@
 
-      PROGRAM JsonParseFile
-        USE json_parser
+      PROGRAM json_parse_file
+        USE json
         IMPLICIT NONE
 
-        INTEGER(1),POINTER :: tokens(:)
-        CHARACTER,POINTER :: source(:)
+        INTEGER(4),POINTER        :: tokens(:)
+        CHARACTER,POINTER         :: json_source(:)
+        INTEGER                   :: location
 
-        INTEGER :: file_status
-        INTEGER :: len_file
-        INTEGER :: file_id
-        INQUIRE(FILE="input.json", SIZE=len_file)
-        
-        OPEN(NEWUNIT=file_id, FILE="input.json", ACTION="read", IOSTAT= &
-     &file_status, FORM="UNFORMATTED", ACCESS="DIRECT", RECL=len_file)
+        CHARACTER(1024),TARGET    :: input_path
+        CHARACTER(1024),POINTER   :: input_path_pointer
 
-        IF(file_status .NE. 0) THEN
-          WRITE (*, *) "error: failed opening the json-file."
-          STOP
-        ENDIF
+        CHARACTER(1024),TARGET    :: directive_path
+        CHARACTER(1024),POINTER   :: directive_path_pointer
 
-        ALLOCATE(source(len_file))
-        READ(UNIT=file_id, IOSTAT=file_status, REC=1) source
-        CLOSE(UNIT=file_id)
+        input_path = "input.json"
+        input_path_pointer => input_path
 
-        PRINT *, source
+        directive_path = "/programming_languages[1]/name"
+        directive_path_pointer => directive_path
 
-        tokens => parse_json(source)
+        CALL tokenize_json_file(input_path_pointer, json_source, tokens)
+        location = search_json_location(tokens, json_source,            &
+     &    directive_path_pointer)
 
-        DEALLOCATE(tokens)
-        DEALLOCATE(source)
+        DEALLOCATE(json_source)
       END
 

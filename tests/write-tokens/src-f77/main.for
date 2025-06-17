@@ -1,6 +1,6 @@
 
       PROGRAM json_write_tokens
-        USE json_parser
+        USE json_tokenizer
         IMPLICIT NONE
 
         INTEGER(4),POINTER :: tokens(:)
