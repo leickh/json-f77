@@ -9,7 +9,7 @@ if [[ $# -lt 1 ]];
 then
     echo "Action needed. Possible options are:"
     echo "- [ b | build ]"
-    echo "- [ bt | build-tests ]"
+    echo "- [ rut | run-unit-tests ]"
     exit -1
 fi
 
@@ -18,10 +18,10 @@ case $1 in
         "$PROJECT_PATH/src-sh/build.sh" "${@:1}"
         ;;
 
-    "bt" | "build-tests")
-        "$PROJECT_PATH/src-sh/build-tests.sh" "${@:1}"
+    "rut" | "run-unit-tests")
+        "$PROJECT_PATH/src-sh/run_unit_tests.sh" "${@:1}"
         ;;
-    
+
     *)
         echo "Unknown Action: '$1'"
         ;;
