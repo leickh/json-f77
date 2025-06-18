@@ -17,7 +17,7 @@ search_sources() {
 }
 
 build_library() {
-    local FILE_LIST=$(search_sources "$PROJECT_PATH/src-f77")
+    local FILE_LIST=$(search_sources "$PROJECT_PATH/src-f90")
 
     mkdir -p "$PROJECT_PATH/.build/module-files"
     # rm -r "$PROJECT_PATH/.build/module-files/"
@@ -34,16 +34,16 @@ build_library() {
 
         gfortran --std=legacy -O2 -g2 -c \
             -o "$PROJECT_PATH/.build/objects/$OBJECT_NAME.o" \
-            "$PROJECT_PATH/src-f77/$FILE_ENTRY.for"
+            "$PROJECT_PATH/src-f90/$FILE_ENTRY.for"
     done
 
-    rm -f "$PROJECT_PATH/.build/objects/json-f77.a"
-    ar -rvs "$PROJECT_PATH/.build/json-f77.a" \
+    rm -f "$PROJECT_PATH/.build/objects/json-f90.a"
+    ar -rvs "$PROJECT_PATH/.build/json-f90.a" \
         "$PROJECT_PATH/.build/objects/"*.o
 }
 
 build_library_n_times() {
-    local NUM_SOURCES=$(search_sources "$PROJECT_PATH/src-f77" | wc -l)
+    local NUM_SOURCES=$(search_sources "$PROJECT_PATH/src-f90" | wc -l)
     ((NUM_SOURCES--))
 
     local BUILD_INDEX=0

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+INVOCATION_PATH="$(pwd)"
 cd $(dirname $0)/..
 PROJECT_PATH=$(pwd)
+cd "$INVOCATION_PATH"
 
 search_sources() {
     local SEARCH_PATH=$1
@@ -22,7 +24,7 @@ build_test() {
 
     mkdir -p "$PROJECT_PATH/.build/tests/$TEST_NAME/objects"
 
-    SOURCE_LIST=$(search_sources "$TEST_PATH/src-f77")
+    SOURCE_LIST=$(search_sources "$TEST_PATH/src-f90")
     
     cd "$PROJECT_PATH/.build/module-files/$SOURCE_SUBFOLDER"
     for SOURCE_NAME in $SOURCE_LIST;
@@ -31,12 +33,12 @@ build_test() {
 
         gfortran -O2 -g2 -c -o \
             "$PROJECT_PATH/.build/tests/$TEST_NAME/objects/$SOURCE_NAME.o" \
-            "$TEST_PATH/src-f77/$SOURCE_NAME.for"
+            "$TEST_PATH/src-f90/$SOURCE_NAME.for"
     done
 
     gfortran -O2 -g2 -o "$PROJECT_PATH/.tests/$TEST_NAME.elf" \
         "$PROJECT_PATH/.build/tests/$TEST_NAME/objects/"*.o \
-        "$PROJECT_PATH/.build/json-f77.a" -lgfortran
+        "$PROJECT_PATH/.build/json-f90.a" -lgfortran
 }
 
 mkdir -p $PROJECT_PATH/.tests
